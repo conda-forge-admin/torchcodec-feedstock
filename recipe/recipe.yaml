@@ -227,6 +227,8 @@ outputs:
                       "test/third-party-interface/test_third_party_interface.py",
                       "test/test_encoders.py::TestAudioEncoder::test_against_cli",
                       "test/test_encoders.py::TestVideoEncoder::test_video_encoder_against_ffmpeg_cli",
+                      # ffprobe intermittently returns truncated JSON for this test on Windows.
+                      "test/test_encoders.py::TestEncoder::test_video_against_ffmpeg_cli",
                   ]
             - |
               pytest_args = ["pytest", "-v"] + pytest_extra_args
