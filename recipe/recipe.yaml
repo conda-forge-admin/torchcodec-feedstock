@@ -188,6 +188,12 @@ outputs:
                       "test/test_decoders.py",
                   ]
                   pytest_extra_args += ["--durations=50"]
+            - if: ffmpeg == "9"
+              then:
+                # FFmpeg 9 may choose different FLAC frame boundaries than TorchCodec
+                # for the same samples. The encoded audio is equivalent, but this test
+                # incorrectly requires identical per-frame segmentation.
+                - tests_to_skip += ["test/test_encoders.py::TestEncoder::test_audio_against_cli"]
             - if: target_platform == "osx-64"
               then:
                 # osx-64 (macOS on Intel) is not explicitly supported by torchcodec, see
@@ -221,6 +227,8 @@ outputs:
                       "test/third-party-interface/test_third_party_interface.py",
                       "test/test_encoders.py::TestAudioEncoder::test_against_cli",
                       "test/test_encoders.py::TestVideoEncoder::test_video_encoder_against_ffmpeg_cli",
+                      # ffprobe intermittently returns truncated JSON for this test on Windows.
+                      "test/test_encoders.py::TestEncoder::test_video_against_ffmpeg_cli",
                   ]
             - |
               pytest_args = ["pytest", "-v"] + pytest_extra_args
