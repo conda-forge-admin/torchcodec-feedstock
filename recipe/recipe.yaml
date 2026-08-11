@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
 
 context:
-  version: "0.14.0"
-  build_number: 1
+  version: "0.15.0"
+  build_number: 0
   torch_proc_type: ${{ "cuda" ~ cuda_compiler_version | version_to_buildstring if cuda_compiler_version != "None" else "cpu" }}
   # ensure arm_variant_type gets detected as a used variable
   touch_arm_variant_type: ${{ arm_variant_type | default("None") }}
@@ -13,8 +13,10 @@ recipe:
 
 source:
   - url: https://github.com/meta-pytorch/torchcodec/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 340d85964f4865b16831b14923e3608866afbe6d5253b46a7c496bcdfb70bffa
+    sha256: 9b96460b95f1d2ab61e2f885189b694f4e67a95ba8d12599859b83afdfa5b2d0
     patches:
+      # Backport https://github.com/meta-pytorch/torchcodec/commit/a87fcd5570845b10b917ca1cd97b938fd68734a0
+      - ffmpeg9.patch
       - fix_third_party_interface_library_loading.patch
       - if: win
         then:
@@ -159,6 +161,8 @@ outputs:
             - ${{ compiler('cxx') }}
             - ${{ compiler('c') }}
             - make
+            # Required by the plugin auto-loading test added in https://github.com/meta-pytorch/torchcodec/pull/1151
+            - pip
             - if: cuda_compiler_version != "None"
               then:
                 - ${{ compiler('cuda') }}
